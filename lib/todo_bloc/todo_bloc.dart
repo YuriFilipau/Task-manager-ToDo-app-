@@ -91,6 +91,7 @@ class TodoBloc extends HydratedBloc<TodoEvent, TodoState> {
       updatedTodos[event.index] = ToDo(
         id: updatedTodos[event.index].id,
         title: updatedTodos[event.index].title,
+        subtitle: updatedTodos[event.index].subtitle,
         isDone: !updatedTodos[event.index].isDone,
       );
       emit(
