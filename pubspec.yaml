@@ -19,6 +19,7 @@ dependencies:
   meta: ^1.15.0
   hydrated_bloc: ^9.1.5
   path_provider: ^2.1.4
+  url_launcher: ^6.3.1
   bloc: ^8.1.4
   sqflite: ^2.4.1
   flutter_slidable: ^3.1.1

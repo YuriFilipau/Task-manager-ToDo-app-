@@ -4,6 +4,7 @@ import 'package:todo_app/data/todo.dart';
 import 'package:todo_app/todo_bloc/todo_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:todo_app/todo_bloc/todo_state.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -106,24 +107,85 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  newTodoBtn() {
-    return FloatingActionButton(
-      onPressed: () {
-        showDialog(
-          context: context,
-          builder: (context) {
-            final TextEditingController controller1 = TextEditingController();
-            final TextEditingController controller2 = TextEditingController();
-            return alertDialog(controller1, controller2);
-          },
+  showConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Confirmation'),
+          content: const Text('Are you sure you want to open Google?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                _launchURL();
+                Navigator.of(context).pop();
+              },
+              child: const Text('Open'),
+            ),
+          ],
         );
       },
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      child: const Icon(
-        Icons.add,
-        color: Colors.white54,
-      ),
     );
+  }
+
+  newTodoBtn() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        FloatingActionButton(
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) {
+                final TextEditingController controller1 =
+                    TextEditingController();
+                final TextEditingController controller2 =
+                    TextEditingController();
+                return alertDialog(controller1, controller2);
+              },
+            );
+          },
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          child: const Icon(
+            Icons.add,
+            color: Colors.white54,
+          ),
+        ),
+        const SizedBox(width: 10),
+        FloatingActionButton(
+          onPressed: _launchURL,
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          child: const Icon(
+            Icons.support_agent,
+            color: Colors.white54,
+          ),
+        ),
+        const SizedBox(width: 10,),
+        FloatingActionButton(
+          onPressed: () {
+            showConfirmationDialog();
+          },
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          child: const Icon(
+            Icons.support,
+            color: Colors.white54,
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _launchURL() async {
+    const url = 'https://google.com/';
+    if (await canLaunchUrl(Uri.parse(url))) {
+      launchUrl(Uri.parse(url));
+    }
   }
 
   createTodoBtn(
@@ -201,9 +263,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           title: Text(
                             state.todos[i].title,
                             style: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                              fontSize: 24
-                            ),
+                                color: Theme.of(context).colorScheme.onPrimary,
+                                fontSize: 24),
                           ),
                           subtitle: Text(
                             state.todos[i].subtitle,
