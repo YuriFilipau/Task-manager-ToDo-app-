@@ -1,4 +1,6 @@
-part of 'todo_bloc.dart';
+import 'package:equatable/equatable.dart';
+
+import '../data/todo.dart';
 
 enum TodoStatus { initial, loading, success, error }
 
@@ -21,27 +23,27 @@ class TodoState extends Equatable {
     );
   }
 
-  @override
-  factory TodoState.fromJson(Map<String, dynamic> json) {
+  factory TodoState.fromMap(Map<String, dynamic> map) {
     try {
-      var listOfTodos = (json['todo'] as List<dynamic>)
-          .map((e) => ToDo.fromJson(e as Map<String, dynamic>))
+      var listOfTodos = (map['todos'] as List<dynamic>)
+          .map((e) => ToDo.fromMap(e as Map<String, dynamic>))
           .toList();
       return TodoState(
           todos: listOfTodos,
           status: TodoStatus.values.firstWhere(
-              (element) => element.name.toString() == json['status']));
+                  (element) => element.toString() == map['status']));
     } catch (e) {
       rethrow;
     }
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
-      'todo': todos,
-      'status': status.name,
+      'todos': todos.map((todo) => todo.toMap()).toList(),
+      'status': status.toString(),
     };
   }
+
   @override
   List<Object?> get props => [todos, status];
 }

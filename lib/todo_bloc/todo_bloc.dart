@@ -1,10 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:todo_app/todo_bloc/todo_state.dart';
 import '../data/todo.dart';
 
 part 'todo_event.dart';
-
-part 'todo_state.dart';
 
 class TodoBloc extends HydratedBloc<TodoEvent, TodoState> {
   TodoBloc() : super(const TodoState()) {
@@ -15,9 +14,9 @@ class TodoBloc extends HydratedBloc<TodoEvent, TodoState> {
   }
 
   void _onStarted(
-    TodoStarted event,
-    Emitter<TodoState> emit,
-  ) {
+      TodoStarted event,
+      Emitter<TodoState> emit,
+      ) {
     if (state.status == TodoStatus.success) return;
     emit(state.copyWith(
       todos: state.todos,
@@ -26,9 +25,9 @@ class TodoBloc extends HydratedBloc<TodoEvent, TodoState> {
   }
 
   void _onAddTodo(
-    AddTodo event,
-    Emitter<TodoState> emit,
-  ) {
+      AddTodo event,
+      Emitter<TodoState> emit,
+      ) {
     emit(
       state.copyWith(
         status: TodoStatus.loading,
@@ -39,10 +38,10 @@ class TodoBloc extends HydratedBloc<TodoEvent, TodoState> {
       temp.addAll(state.todos);
       temp.insert(0, event.toDo);
       emit(
-        state.copyWith(
-          todos: temp,
-          status: TodoStatus.success
-        )
+        TodoState(
+            todos: temp,
+            status: TodoStatus.success
+        ),
       );
     } catch (e) {
       emit(
@@ -54,43 +53,52 @@ class TodoBloc extends HydratedBloc<TodoEvent, TodoState> {
   }
 
   void _onRemoveTodo(
-    RemoveTodo event,
-    Emitter<TodoState> emit,
-  ) {
+      RemoveTodo event,
+      Emitter<TodoState> emit,
+      ) {
     emit(
       state.copyWith(
         status: TodoStatus.loading,
       ),
     );
     try {
-      state.todos.remove(event.toDo);
-      emit(state.copyWith(
-        todos: state.todos,
-        status: TodoStatus.success,
-      ));
+      List<ToDo> updatedTodos = List.from(state.todos);
+      updatedTodos.remove(event.toDo);
+      emit(
+        state.copyWith(
+          todos: updatedTodos,
+          status: TodoStatus.success,
+        ),
+      );
     } catch (e) {
       emit(
         state.copyWith(
           status: TodoStatus.error,
-
         ),
       );
     }
   }
 
   void _onAlterTodo(
-    AlterTodo event,
-    Emitter<TodoState> emit,
-  ) {
+      AlterTodo event,
+      Emitter<TodoState> emit,
+      ) {
     emit(
       state.copyWith(status: TodoStatus.loading),
     );
     try {
-      state.todos[event.index].isDone = !state.todos[event.index].isDone;
-      emit(state.copyWith(
-        todos: state.todos,
-        status: TodoStatus.success,
-      ));
+      List<ToDo> updatedTodos = List.from(state.todos);
+      updatedTodos[event.index] = ToDo(
+        id: updatedTodos[event.index].id,
+        title: updatedTodos[event.index].title,
+        isDone: !updatedTodos[event.index].isDone,
+      );
+      emit(
+        TodoState(
+          todos: updatedTodos,
+          status: TodoStatus.success,
+        ),
+      );
     } catch (e) {
       emit(
         state.copyWith(
@@ -101,12 +109,16 @@ class TodoBloc extends HydratedBloc<TodoEvent, TodoState> {
   }
 
   @override
-  TodoState? fromJson(Map<String, dynamic> json) {
-    return TodoState.fromJson(json);
+  TodoState fromJson(Map<String, dynamic> json) {
+    try {
+      return TodoState.fromMap(json);
+    } catch (e) {
+      return const TodoState();
+    }
   }
 
   @override
-  Map<String, dynamic>? toJson(TodoState state) {
-    return state.toJson();
+  Map<String, dynamic> toJson(TodoState state) {
+    return state.toMap();
   }
 }

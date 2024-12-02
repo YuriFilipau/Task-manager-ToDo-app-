@@ -20,6 +20,7 @@ dependencies:
   hydrated_bloc: ^9.1.5
   path_provider: ^2.1.4
   bloc: ^8.1.4
+  sqflite: ^2.4.1
   flutter_slidable: ^3.1.1
 
 dev_dependencies:

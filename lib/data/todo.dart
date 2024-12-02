@@ -1,46 +1,74 @@
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+
 class ToDo {
+  final int id;
   final String title;
   final String subtitle;
   bool isDone;
 
   ToDo({
+    this.id = 0,
     this.title = ' ',
     this.subtitle = ' ',
     this.isDone = false,
   });
 
-  ToDo copyWith({
-    String? title,
-    String? subtitle,
-    bool? isDone,
-  }){
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'title': title,
+      'subtitle': subtitle,
+      'isDone': isDone ? 1 : 0,
+    };
+  }
+
+  factory ToDo.fromMap(Map<String, dynamic> map) {
     return ToDo(
-      title: title ?? this.title,
-      subtitle: subtitle ?? this.subtitle,
-      isDone: isDone ?? this.isDone
+      id: map['id'],
+      title: map['title'],
+      subtitle: map['subtitle'],
+      isDone: map['isDone'] == 1 ? true : false,
     );
   }
 
-  factory ToDo.fromJson(Map<String, dynamic> json){
-    return ToDo(
-      title: json['title'],
-      subtitle: json['subtitle'],
-      isDone: json['isDone'],
+  Future<void> insertToDo() async {
+    final Database db = await openDatabase(
+      join(await getDatabasesPath(), 'todos_database.db'),
+      onCreate: (db, version) {
+        return db.execute(
+          'CREATE TABLE todos(id INTEGER PRIMARY KEY, title TEXT, subtitle TEXT, isDone INTEGER)',
+        );
+      },
+      version: 1,
+    );
+
+    await db.insert(
+      'todos',
+      toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
-  Map<String, dynamic> toJson(){
-    return{
-      'title': title,
-      'subtitle': subtitle,
-      'isDone': isDone
-    };
+
+  Future<List<ToDo>> getToDos() async {
+    final Database db = await openDatabase(
+      join(await getDatabasesPath(), 'todos_database.db'),
+    );
+
+    final List<Map<String, dynamic>> maps = await db.query('todos');
+
+    return List.generate(maps.length, (i) {
+      return ToDo.fromMap(maps[i]);
+    });
   }
+
   @override
-  String toString(){
+  String toString() {
     return '''ToDo{
-    title: $title\n
-    subtitle: $subtitle\n
-    isDone: $isDone\n
+    id: $id,
+    title: $title,
+    subtitle: $subtitle,
+    isDone: $isDone,
     }''';
   }
 }
